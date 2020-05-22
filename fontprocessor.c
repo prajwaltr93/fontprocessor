@@ -5,16 +5,31 @@
 FT_Library  library;
 FT_Face font_face;
 
-void erro_print(char *mesg)
-{
+void erro_print(char *mesg) {
 	printf("error: %s\n",mesg);
 	exit(1);
 }
 
-int main(int argc,char *argv[])
-{
+void usage() {
+  printf("renderer [ -h | --help ]\n\t -h | --help (optional) help\n");
+}
+
+int main(int argc,char *argv[]) {
 	FT_UInt glyph_index;
 	//TODO : parse arguments
+	while((opt = getopt(argc,argv,"h")) != -1) {
+		switch (opt) {
+
+			case 'h':
+				usage();
+				return 0;
+
+			default:
+				usage();
+				return 0;
+		}
+	}
+	
 	if FT_Init_FreeType(&library) ? erro_print("library initialization\n");
 	//load default font
 	if FT_New_Face(library, PATH_WHITE_RABBIT, 0, &font_face) ? erro_print("failed to load font\n");
