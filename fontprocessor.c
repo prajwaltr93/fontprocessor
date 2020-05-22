@@ -2,10 +2,8 @@
 #include FT_FREETYPE_H
 #include<stdio.h>
 
-#define path_to_font "/home/starkm42/Downloads/white_rabbit/whitrabt.ttf"
-
 FT_Library  library;
-FT_Face white_face;
+FT_Face font_face;
 
 void erro_print(char *mesg)
 {
@@ -13,30 +11,14 @@ void erro_print(char *mesg)
 	exit(1);
 }
 
-
-int main()
+int main(int argc,char *argv[])
 {
 	FT_UInt glyph_index;
-	int error = FT_Init_FreeType(&library);
-	if(error)
-	{
-		erro_print("load library\n");
+	//TODO : parse arguments
+	if FT_Init_FreeType(&library) ? erro_print("library initialization\n");
+	//load default font
+	if FT_New_Face(library, PATH_WHITE_RABBIT, 0, &font_face) ? erro_print("failed to load font\n");
 
-	}
-	else
-	{
-		printf("success\n");
-	}
-	//load white rabbit font
-	error =  FT_New_Face( library,path_to_font,0,&white_face);
-	if(error)
-	{
-		erro_print("font not loaded\n");
-	}
-
-	//loading face params
-	printf("number %ld\n",white_face->num_glyphs);
-	printf("number %d\n",white_face->num_charmaps);
 	error = FT_Set_Char_Size(
           white_face,    /* handle to face object           */
           0,       /* char_width in 1/64th of points  */
