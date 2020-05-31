@@ -1,77 +1,40 @@
-#include<ft2build.h>
+#include <ft2build.h>
 #include FT_FREETYPE_H
-#include<stdio.h>
+#include <stdio.h>
+#include <unistd.h>
+#include "fontprocessor.h"
 
+//global declaration
 FT_Library  library;
 FT_Face font_face;
+FT_GlyphSlot  slot;
 
-void erro_print(char *mesg) {
-	printf("error: %s\n",mesg);
+void error_print(char *mesg, int error) {
+
+	printf("error code : %d error message : %s\n",mesg);
 	exit(1);
-}
 
-void usage() {
-  printf("renderer [ -h | --help ]\n\t -h | --help (optional) help\n");
 }
 
 int main(int argc,char *argv[]) {
+
 	FT_UInt glyph_index;
-	//TODO : parse arguments
-	while((opt = getopt(argc,argv,"h")) != -1) {
-		switch (opt) {
+	int opt,error;
 
-			case 'h':
-				usage();
-				return 0;
+	//load library
+	if((error = FT_Init_FreeType(&library)) != 0) error_print("library initialization\n",error);
 
-			default:
-				usage();
-				return 0;
-		}
-	}
-	
-	if FT_Init_FreeType(&library) ? erro_print("library initialization\n");
 	//load default font
-	if FT_New_Face(library, PATH_WHITE_RABBIT, 0, &font_face) ? erro_print("failed to load font\n");
+	if((error = FT_New_Face(library, PATH_WHITE_RABBIT, 0, &font_face)) == FT_Err_Unknown_File_Format) error_print("failed to load font\n",error);
 
-	error = FT_Set_Char_Size(
-          white_face,    /* handle to face object           */
-          0,       /* char_width in 1/64th of points  */
-          16*64,   /* char_height in 1/64th of points */
-          300,     /* horizontal device resolution    */
-          300 );   /* vertical device resolution      */
-	if(error)
-	{
-		erro_print("set font size\n");
-	}
-	error = FT_Set_Pixel_Sizes(
-				          white_face,   /* handle to face object */
-				          0,      /* pixel_width           */
-				          16 );
-	if(error)
-	{
-		erro_print("set pixel size\n");
-	}
-	glyph_index = FT_Get_Char_Index(white_face, 65);
-	if(glyph_index == 0)
-	{
-		erro_print("character not found!!");
-	}
-	error = FT_Load_Glyph(
-          white_face,          /* handle to face object */
-          glyph_index,   /* glyph index           */
-          0 );  /* load flags, see below */
-	if(error)
-	{
-		erro_print("failed load glyph from face\n");
+  //glyph slot
+  slot = font_face->glyph;
 
-	}
-	error = FT_Render_Glyph( white_face->glyph,   /* glyph slot  */
-			                         FT_RENDER_MODE_MONO);
-	if(error)
-	{
-		erro_print("bitmap conversion failed!!\n");
+  //set pixel size, to overide zero initialization to all size object values
+  if((error = FT_Set_Pixel_Sizes(font_face, 0, 1)) != 0) error_print("font size setting\n",error);
 
-	}
-		return 0;
+  //load glyph to glyph slot
+	if((error = FT_Load_Char(font_face, 'A', FT_LOAD_DEFAULT)) != 0) error_print("glyph not found\n",error);
+
+	return 0;
 }
