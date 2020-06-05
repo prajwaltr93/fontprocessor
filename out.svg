@@ -1,8 +1,8 @@
 <svg xmlns='http://www.w3.org/2000/svg'
-     xmlns:xlink='http://www.w3.org/1999/xlink'
-     viewBox='-100 -2880 2040 2752'>
-     <path d='
-       M 1246 -132
+xmlns:xlink='http://www.w3.org/1999/xlink'
+viewBox = '-100 -2880 2040 2752'>
+ <path d = '
+M 1246 -132
 Q 1168 -142, 1108 -183
 Q 1038 -233, 982 -346
 Q 900 -514, 880 -838
@@ -149,5 +149,7 @@ Q 528 -2037, 542 -2039
 Q 556 -2041, 574 -2043
 Q 592 -2045, 617 -2049
 Q 642 -2053, 674 -2057
-' fill='red'/>
+
+' 
+ fill='red'/>
 </svg>

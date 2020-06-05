@@ -2,12 +2,28 @@
 #include FT_FREETYPE_H
 #include <stdio.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include "fontprocessor.h"
 #include FT_OUTLINE_H
 #include FT_BBOX_H
 
 FT_Library  library = NULL;
 FT_Face font_face = NULL;
+
+int debug_file;
+char mesg[100];
+
+//helper functions
+void write_svg(char *line, int flag) {
+
+	if(flag) {
+		write(debug_file,SVG_START_STRING,strlen(SVG_START_STRING));
+	}
+	else {
+		write(debug_file,line,strlen(line));
+		strcpy(mesg, ""); //clear contents of mesg
+	}
+}
 
 void error_print(char *mesg, int error) {
 
@@ -29,9 +45,10 @@ int MoveToFunction(const FT_Vector* to, void* user) {
 	FT_Pos x = to->x;
   FT_Pos y = to->y;
 
-  printf("M %ld %ld\n",x,y);
+	sprintf(mesg, "M %ld %ld\n" , x, y);
+	write_svg(mesg, 0);
 
-  return 0;
+	return 0;
 }
 
 int LineToFunction(const FT_Vector *to,void *user) {
@@ -39,7 +56,8 @@ int LineToFunction(const FT_Vector *to,void *user) {
   FT_Pos x = to->x;
   FT_Pos y = to->y;
 
-  printf("L %ld %ld\n",x,y);
+  sprintf(mesg, "L %ld %ld\n", x, y);
+	write_svg(mesg,0);
 
   return 0;
 }
@@ -52,7 +70,8 @@ int ConicToFunction(const FT_Vector *control, const FT_Vector *to, void *user) {
   FT_Pos x = to->x;
   FT_Pos y = to->y;
 
-  printf("Q %ld %ld, %ld %ld\n",controlX,controlY,x,y);
+  sprintf(mesg, "Q %ld %ld, %ld %ld\n", controlX, controlY, x, y);
+	write_svg(mesg,0);
 
   return 0;
 }
@@ -68,7 +87,8 @@ int CubicToFunction(const FT_Vector *controlOne, const FT_Vector *controlTwo, co
   FT_Pos x = to->x;
   FT_Pos y = to->y;
 
-  printf("C %ld %ld %ld %ld %ld %ld\n",controlOneX, controlOneY, controlTwoX, controlTwoY, x, y);
+  sprintf(mesg, "C %ld %ld %ld %ld %ld %ld\n",controlOneX, controlOneY, controlTwoX, controlTwoY, x, y);
+	write_svg(mesg, 0);
 
   return 0;
 }
@@ -85,6 +105,10 @@ int main(int argc,char *argv[]) {
 	  FT_Pos m_yMin;
 	  FT_Pos m_width;
 	  FT_Pos m_height;
+		FT_Pos xMin;
+	  FT_Pos yMin;
+	  FT_Pos xMax;
+	  FT_Pos yMax;
 		const FT_Fixed multiplier = 65536L;
 		User user = {0};
 		int error;
@@ -127,19 +151,30 @@ int main(int argc,char *argv[]) {
 
 		FT_Outline_Get_BBox(&outline, &boundingBox);
 
-	  FT_Pos xMin = boundingBox.xMin;
-	  FT_Pos yMin = boundingBox.yMin;
-	  FT_Pos xMax = boundingBox.xMax;
-	  FT_Pos yMax = boundingBox.yMax;
+		xMin = boundingBox.xMin;
+	 	yMin = boundingBox.yMin;
+	 	xMax = boundingBox.xMax;
+	 	yMax = boundingBox.yMax;
 
-	  m_xMin = xMin;
+		m_xMin = xMin;
 	  m_yMin = yMin;
 	  m_width = xMax - xMin;
 	  m_height = yMax - yMin;
 
-		printf("bounding box : %ld %ld %ld %ld\n",m_xMin,m_yMin,m_width,m_height);
+		debug_file = open("./out.svg",O_CREAT | O_WRONLY,0666);
+		if(debug_file == -1) {
+			//file already exists
+			debug_file = open("./out.svg",O_WRONLY | O_TRUNC,0666);
+		}
+		write_svg("",1); //write starting lines
+
+		sprintf(mesg, "viewBox = '%ld %ld %ld %ld'>\n <path d = \'\n", m_xMin,m_yMin,m_width,m_height);
+
+		write_svg(mesg,0);
 
 		FT_Outline_Decompose(&outline, &outlinefuncs, (void *) &user);
+
+		write_svg("\n\' \n fill=\'red\'/>\n</svg>", 0);
 
 		return 0;
 }
