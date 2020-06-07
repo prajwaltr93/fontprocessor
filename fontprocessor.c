@@ -123,7 +123,7 @@ int main(int argc,char *argv[]) {
 	  slot = font_face->glyph;
 
 	  //set pixel size, to overide zero initialization to all size object values
-	  if((error = FT_Set_Pixel_Sizes(font_face, 64, 0))) error_print("font_face size setting\n",error);
+	  if((error = FT_Set_Pixel_Sizes(font_face, 16, 0))) error_print("font_face size setting\n",error);
 
 	  //load glyph to glyph slot
 		if((error = FT_Load_Char(font_face, 'A', FT_LOAD_DEFAULT)) != 0) error_print("glyph not found\n",error);
@@ -161,7 +161,7 @@ int main(int argc,char *argv[]) {
 	  m_width = xMax - xMin;
 	  m_height = yMax - yMin;
 
-		debug_file = open("./out.svg",O_CREAT | O_WRONLY,0666);
+		debug_file = open("./out.svg",O_CREAT | O_WRONLY | O_EXCL,0666);
 		if(debug_file == -1) {
 			//file already exists
 			debug_file = open("./out.svg",O_WRONLY | O_TRUNC,0666);
@@ -174,7 +174,7 @@ int main(int argc,char *argv[]) {
 
 		FT_Outline_Decompose(&outline, &outlinefuncs, (void *) &user);
 
-		write_svg("\n\' \n fill=\'red\'/>\n</svg>", 0);
+		write_svg("\n\' \n fill=\'none\' stroke='black'/>\n</svg>", 0);
 
 		return 0;
 }
